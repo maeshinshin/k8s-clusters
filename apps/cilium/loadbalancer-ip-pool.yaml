@@ -2,6 +2,8 @@ apiVersion: cilium.io/v2
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: ip-pool
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   blocks:
     - cidr: "192.168.0.64/26"
