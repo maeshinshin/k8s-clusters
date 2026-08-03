@@ -1,0 +1,4 @@
+configOverride: |
+  [global]
+  mon_target_pg_per_osd = 64
+  mon_max_pg_per_osd = 128
