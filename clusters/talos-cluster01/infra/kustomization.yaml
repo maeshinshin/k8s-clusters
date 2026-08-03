@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - cilium-app.yaml
   - argocd-app.yaml
+  - rook-ceph-app.yaml
