@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://ceph.github.io/ceph-csi-operator
       chart: ceph-csi-drivers
-      targetRevision: 0.2.0
+      targetRevision: 1.0.4
       helm:
         valueFiles:
           - $values/apps/infra/ceph-csi-drivers/values.yaml
