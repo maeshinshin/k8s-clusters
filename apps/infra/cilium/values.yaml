@@ -62,7 +62,7 @@ hubble:
     serviceMonitor:
       enabled: true
       labels:
-        release: kube-prometheus
+        release: kube-prometheus-stack
     dashboards:
       enabled: true
       labels:
