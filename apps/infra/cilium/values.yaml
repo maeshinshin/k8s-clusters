@@ -40,3 +40,29 @@ l2announcements:
 
 bgpControlPlane:
   enabled: false
+
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+    service:
+      type: LoadBalancer
+  metrics:
+    enabled:
+      - drop
+      - tcp
+      - flow
+      - port-distribution
+      - icmp
+      - dns
+      - httpV2
+    serviceMonitor:
+      enabled: true
+      labels:
+        release: kube-prometheus
+    dashboards:
+      enabled: true
+      labels:
+        grafana_dashboard: "1"
