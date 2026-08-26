@@ -1,0 +1,8 @@
+# rook-ceph operator chart values
+# Currently empty because chart 1.20.3 has WATCH_NAMESPACE hardcoded to ""
+# (see ~/ISSUE.md). Workaround: post-install manual patch + ArgoCD
+# ignoreDifferences for env[2].value on the ceph-csi-controller-manager
+# Deployment.
+
+csi:
+  installCsiOperator: true

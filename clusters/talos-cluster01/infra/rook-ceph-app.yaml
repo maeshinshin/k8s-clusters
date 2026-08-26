@@ -11,6 +11,9 @@ spec:
     - repoURL: https://charts.rook.io/release
       chart: rook-ceph
       targetRevision: v1.20.3
+      helm:
+        valueFiles:
+          - $values/apps/infra/rook-ceph/values.yaml
     - repoURL: https://github.com/maeshinshin/k8s-clusters.git
       targetRevision: HEAD
       ref: values
@@ -25,3 +28,15 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+  # The rook-ceph chart 1.20.3 has WATCH_NAMESPACE hardcoded to ""
+  # (see ~/ISSUE.md). After first sync, patch the Deployment manually
+  # with `kubectl patch deploy ceph-csi-controller-manager -n rook-ceph
+  # --type json -p='[{"op":"replace","path":"/spec/template/spec/containers/0/env/2/value","value":"rook-ceph"}]'`
+  # then ArgoCD will leave the manual change alone.
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: ceph-csi-controller-manager
+      namespace: rook-ceph
+      jsonPointers:
+        - /spec/template/spec/containers/0/env/2/value
