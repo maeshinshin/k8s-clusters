@@ -38,6 +38,27 @@ prometheus:
         memory: 2Gi
     # Reduce WAL/traces overhead for small cluster
     walCompression: true
+    # Rook-Ceph mgr prometheus module exposes metrics on port 9283
+    additionalScrapeConfigs:
+      - job_name: rook-ceph-mgr
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names: [rook-ceph]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_label_rook_ceph_dashboard]
+            regex: "true"
+            action: keep
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            regex: http-prometheus
+            action: keep
+          - source_labels: [__meta_kubernetes_endpoint_port_number]
+            target_label: __address__
+            replacement: ${1}
+            action: replace
+          - source_labels: [__meta_kubernetes_service_name]
+            target_label: service
+            action: replace
   service:
     type: LoadBalancer
   servicePerReplica:
@@ -118,12 +139,27 @@ nodeExporter:
   enabled: true
 kubelet:
   enabled: true
+  serviceMonitor:
+    cAdvisor: true   # container-level metrics (cpu/mem/per-cgroup)
 kubeApiserver:
   enabled: true
 kubeControllerManager:
-  enabled: false
+  enabled: true
+  endpoints: []
+  service:
+    port: 10257
+  serviceMonitor:
+    # The default selector matches the kube-system endpoint created by Talos
+    # (kube-controller-manager endpoint). honorLabels: true ensures
+    # prometheus uses the endpoint's labels rather than the SM labels.
+    honorLabels: true
 kubeScheduler:
-  enabled: false
+  enabled: true
+  endpoints: []
+  service:
+    port: 10259
+  serviceMonitor:
+    honorLabels: true
 
 prometheusOperator:
   enabled: true
@@ -134,3 +170,6 @@ prometheusOperator:
     limits:
       cpu: 500m
       memory: 256Mi
+
+# Additional scrape configs for components not covered by ServiceMonitors
+# (merged into the prometheusSpec block above)

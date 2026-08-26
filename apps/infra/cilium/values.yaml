@@ -58,8 +58,12 @@ hubble:
       - icmp
       - dns
       - httpV2
-    # Enable ServiceMonitor + dashboards once kube-prometheus-stack is deployed.
+    # Scrape label matches kube-prometheus-stack default selector
     serviceMonitor:
-      enabled: false
+      enabled: true
+      labels:
+        release: kube-prometheus
     dashboards:
-      enabled: false
+      enabled: true
+      labels:
+        grafana_dashboard: "1"
