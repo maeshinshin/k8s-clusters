@@ -1,0 +1,33 @@
+# ceph-csi-drivers chart values
+# Installs the actual CSI driver pods (Daemonset / Deployment) and
+# the related ServiceAccounts + RBAC. This complements rook-ceph
+# which only deploys the ceph-csi-operator (controller that watches
+# Driver CRs).
+#
+# See: https://github.com/ceph/ceph-csi-operator/tree/v1.0.4/deploy/charts/ceph-csi-drivers
+# Reference PR: https://github.com/LukasParke/home-ops/pull/94
+
+# Let Rook continue owning the connection/client-profile resources
+cephConnections: []
+clientProfiles: []
+
+operatorConfig:
+  namespace: rook-ceph
+  driverSpecDefaults:
+    priorityClassName: ""
+    controllerPriorityClassName: system-cluster-critical
+    nodePriorityClassName: system-node-critical
+    kubeletDirPath: /var/lib/kubelet
+    fsGroupPolicy: File
+
+drivers:
+  rbd:
+    enabled: true
+    name: rook-ceph.rbd.csi.ceph.com
+  cephfs:
+    enabled: true
+    name: rook-ceph.cephfs.csi.ceph.com
+  nfs:
+    enabled: false
+  nvmeof:
+    enabled: false

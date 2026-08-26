@@ -5,4 +5,5 @@ resources:
   - argocd-app.yaml
   - rook-ceph-app.yaml
   - rook-ceph-cluster-app.yaml
+  - ceph-csi-drivers-app.yaml
   - kube-prometheus-stack-app.yaml
