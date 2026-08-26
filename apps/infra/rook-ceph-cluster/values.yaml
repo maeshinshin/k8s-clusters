@@ -2,7 +2,6 @@ operatorNamespace: rook-ceph
 
 cephClusterSpec:
   csi:
-    rbd: {}
     cephfs: {}
     readAffinity:
       enabled: false
