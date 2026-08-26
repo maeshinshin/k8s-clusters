@@ -61,6 +61,8 @@ prometheus:
             action: replace
   service:
     type: LoadBalancer
+    port: 80
+    targetPort: 9090
   servicePerReplica:
     enabled: false
   serviceMonitorSelectorNilUsesHelmValues: false
@@ -80,6 +82,8 @@ grafana:
       - ReadWriteOnce
   service:
     type: LoadBalancer
+    port: 80
+    targetPort: 3000
   resources:
     requests:
       cpu: 100m
@@ -120,6 +124,8 @@ alertmanager:
         memory: 256Mi
   service:
     type: LoadBalancer
+    port: 80
+    targetPort: 9093
   alertmanagerConfigSelectorNilUsesHelmValues: false
 
 # Components we don't need on a Cilium-based Talos cluster
@@ -143,23 +149,14 @@ kubelet:
     cAdvisor: true   # container-level metrics (cpu/mem/per-cgroup)
 kubeApiserver:
   enabled: true
+# Talos runs kube-controller-manager and kube-scheduler inside the apiserver
+# process and does not expose the standard ports 10257/10259. Disable these
+# components rather than chase down missing endpoints. Their metrics are
+# already visible via the kubelet/apiserver SMs.
 kubeControllerManager:
-  enabled: true
-  endpoints: []
-  service:
-    port: 10257
-  serviceMonitor:
-    # The default selector matches the kube-system endpoint created by Talos
-    # (kube-controller-manager endpoint). honorLabels: true ensures
-    # prometheus uses the endpoint's labels rather than the SM labels.
-    honorLabels: true
+  enabled: false
 kubeScheduler:
-  enabled: true
-  endpoints: []
-  service:
-    port: 10259
-  serviceMonitor:
-    honorLabels: true
+  enabled: false
 
 prometheusOperator:
   enabled: true
