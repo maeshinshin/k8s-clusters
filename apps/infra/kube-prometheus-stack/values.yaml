@@ -1,0 +1,136 @@
+# kube-prometheus-stack values tuned for a small Talos cluster
+# Reference: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+
+createNamespace: true
+namespaceOverride: monitoring
+
+# Cluster-wide identifier for federation / multi-cluster dashboards
+cluster:
+  # chart expects clusterName in prometheusSpec.externalLabels, set below
+  name: talos-cluster01
+
+prometheus:
+  prometheusSpec:
+    externalLabels:
+      cluster: talos-cluster01
+    retention: 15d
+    retentionSize: 25GB
+    # Pick up ServiceMonitors/PodMonitors from anywhere in the cluster
+    # (default selector already targets release=kube-prometheus, which is what
+    # Cilium uses via apps/infra/cilium/values.yaml).
+    scrapeInterval: 30s
+    evaluationInterval: 30s
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: ceph-block
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 30Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    # Reduce WAL/traces overhead for small cluster
+    walCompression: true
+  service:
+    type: LoadBalancer
+  servicePerReplica:
+    enabled: false
+  serviceMonitorSelectorNilUsesHelmValues: false
+  podMonitorSelectorNilUsesHelmValues: false
+  ruleSelectorNilUsesHelmValues: false
+
+grafana:
+  enabled: true
+  # Default credentials. Override after first login.
+  adminUser: admin
+  adminPassword: prom-operator
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClassName: ceph-block
+    accessModes:
+      - ReadWriteOnce
+  service:
+    type: LoadBalancer
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  defaultDashboardsEnabled: true
+  # Grafana picks up sidecar-loaded ConfigMaps labeled grafana_dashboard=1,
+  # including the Hubble dashboards from Cilium.
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: monitoring,kube-system
+    datasources:
+      enabled: true
+      searchNamespace: monitoring
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: ceph-block
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+  service:
+    type: LoadBalancer
+  alertmanagerConfigSelectorNilUsesHelmValues: false
+
+# Components we don't need on a Cilium-based Talos cluster
+coreDns:
+  enabled: false
+kubeDns:
+  enabled: false
+kubeProxy:
+  enabled: false
+kubeEtcd:
+  enabled: false
+
+# Keep these on; they're either required or useful for kube-state visibility
+kubeStateMetrics:
+  enabled: true
+nodeExporter:
+  enabled: true
+kubelet:
+  enabled: true
+kubeApiserver:
+  enabled: true
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+
+prometheusOperator:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
