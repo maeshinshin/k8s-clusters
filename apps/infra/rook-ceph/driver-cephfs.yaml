@@ -1,0 +1,7 @@
+apiVersion: csi.ceph.io/v1
+kind: Driver
+metadata:
+  name: cephfs.csi.ceph.com
+  namespace: rook-ceph
+spec:
+  clusterName: rook-ceph
