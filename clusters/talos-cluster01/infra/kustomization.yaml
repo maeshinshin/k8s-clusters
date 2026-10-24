@@ -7,3 +7,5 @@ resources:
   - rook-ceph-cluster-app.yaml
   - ceph-csi-drivers-app.yaml
   - kube-prometheus-stack-app.yaml
+  - kubevirt-app.yaml
+  - cdi-app.yaml
