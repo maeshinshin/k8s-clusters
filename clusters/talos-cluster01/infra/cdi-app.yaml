@@ -20,3 +20,18 @@ spec:
       selfHeal: true
     syncOptions:
       - ServerSideApply=true
+      # Needed with ignoreDifferences below: on its own, ignoreDifferences only
+      # hides the diff and selfHeal still writes the ignored field back.
+      - RespectIgnoreDifferences=true
+  # The cdi-operator owns spec.versions on its own CRD and reduces it to the
+  # served version, v1beta1, while the release manifest also declares v1alpha1.
+  # Confirmed from managedFields on the live CRD: manager=cdi-operator,
+  # operation=Update, owning f:spec/f:versions. Keyed on the owner rather than
+  # a field path, so an upstream change to anything the operator does not own
+  # still shows up as a diff.
+  ignoreDifferences:
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+      name: cdis.cdi.kubevirt.io
+      managedFieldsManagers:
+        - cdi-operator
